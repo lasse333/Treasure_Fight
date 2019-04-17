@@ -73,7 +73,7 @@ function sound(src) {
         this.sound.pause();
     }
 }
-
+l
 var dead = false
 var paused = false
 var gameRunning = false
@@ -340,7 +340,7 @@ function credits() {
 	ctx.font = "60px 'Arial Black', Gadget, sans-serif";
 	ctx.fillStyle = "#ffffff";
 	ctx.textAlign = "center"
-	ctx.fillText("Made by René Skjødt", canvas.width/2, credit);
+	ctx.fillText("Made by lasse333", canvas.width/2, credit);
 	if (time >= 300) {setTimeout(function reset() {location.reload(true)}, 3000)}
 	credit += 4
 	time += 1
@@ -460,7 +460,7 @@ function pauseOption2() {
 function pauseCredit() {
 	ctx.font = "30px 'Arial Black', Gadget, sans-serif";
 	ctx.fillStyle = "#ffffff";
-	ctx.fillText("Made by René Skjødt", canvas.width/2+5, canvas.height/2+200);
+	ctx.fillText("Made by lasse333", canvas.width/2+5, canvas.height/2+200);
 }
 
 function pauseSelect() {
