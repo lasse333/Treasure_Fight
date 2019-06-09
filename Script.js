@@ -73,7 +73,7 @@ function sound(src) {
         this.sound.pause();
     }
 }
-l
+
 var dead = false
 var paused = false
 var gameRunning = false
