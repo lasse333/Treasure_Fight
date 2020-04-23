@@ -9,6 +9,7 @@ var canvas = document.getElementById("myCanvas")
 var ctx = canvas.getContext("2d")
 
 
+
 function component(width, height, color, x, y, type) {
     this.type = type;
 	if (type === "image") {
@@ -20,13 +21,12 @@ function component(width, height, color, x, y, type) {
     this.x = x;
     this.y = y; 
     this.speedX = 0;
-    this.speedY = 0; 
-    this.gravity = 0.15;
+    this.speedY = 0;
+    this.gravity = 0.3;
     this.gravitySpeed = 0;
-	this.runningStart = false;
 	this.standing = false;
-	this.superJump = false;
-	this.duck = false
+	this.score = 0
+	this.boost = 15;
     this.update = function() {
 		if (type === "image") {
 			ctx.beginPath()
@@ -55,8 +55,529 @@ function component(width, height, color, x, y, type) {
 		var rockbottom = canvas.height - this.height
 		if (this.y > rockbottom) {
 			this.y = rockbottom
+			this.standing = true
+			this.gravitySpeed = 0;
+			this.boost = 0
 		}
 	}
+}
+
+var KeyBoard = {
+    Up: false,
+    Down: false,
+    Right: false,
+    Left: false,
+    Start: false,
+    Buttons: [false, false, false, false, false, false]
+};
+
+var KeyBoard2 = {
+    Up: false,
+    Down: false,
+    Right: false,
+    Left: false,
+    Start: false,
+    Buttons: [false, false, false, false, false, false]
+};
+
+var Gamepads = [];
+
+function Gamepad(id) {
+    this.Id = id;
+    this.Down = false;
+    this.Right = false;
+    this.Left = false;
+    this.Up = false;
+    this.Start = false;
+    this.Buttons = [false, false, false, false, false, false];
+    this.Update = function() {
+        if (this.Id != "keyboard" && this.Id != "keyboard2") {
+            if (navigator.getGamepads()[this.Id].id == "Wireless Gamepad (Vendor: 057e Product: 2006)") { //Joy-Con L
+                if (navigator.getGamepads()[this.Id].axes[9] == -1) {
+                    this.Up = true;
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == -0.7142857313156128) {
+                    this.Up = true;
+                    this.Right = true;
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == -0.4285714030265808) {
+                    this.Right = true;
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == -0.1428571343421936) {
+                    this.Right = true;
+                    this.Down = true;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 0.14285719394683838) {
+                    this.Down = true;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 0.4285714626312256) {
+                    this.Down = true;
+                    this.Left = true;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 0.7142857313156128) {
+                    this.Left = true;
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 1) {
+                    this.Left = true;
+                    this.Up = true;
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] > 1) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[8].pressed;
+                for (i = 0; i < 6; i++) {
+                    this.Buttons[i] = navigator.getGamepads()[this.Id].buttons[i].pressed;
+                }
+            }
+            if (navigator.getGamepads()[this.Id].id == "Wireless Gamepad (Vendor: 057e Product: 2007)") { //Joy-Con R
+                if (navigator.getGamepads()[this.Id].axes[9] == -1) {
+                    this.Up = true;
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == -0.7142857313156128) {
+                    this.Up = true
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == -0.4285714030265808) {
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == -0.1428571343421936) {
+                    this.Right = true
+                    this.Down = true
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 0.14285719394683838) {
+                    this.Down = true
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 0.4285714626312256) {
+                    this.Down = true
+                    this.Left = true
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 0.7142857313156128) {
+                    this.Left = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] == 1) {
+                    this.Left = true
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[9] > 1) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[9].pressed
+                for (i = 0; i < 6; i++) {
+                    this.Buttons[i] = navigator.getGamepads()[this.Id].buttons[i].pressed
+                }
+            }
+            if (navigator.getGamepads()[this.Id].id == "Xbox 360 Controller (XInput STANDARD GAMEPAD)") { //Xbox 360 Wireless
+                if (navigator.getGamepads()[this.Id].axes[1] < -0.5 || !navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] < -0.5 && navigator.getGamepads()[this.Id].axes[0] > 0.5 || navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Up = true
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] > 0.5 && navigator.getGamepads()[this.Id].axes[1] > -0.5 || !navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] > 0.5 || navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Right = true
+                    this.Down = true
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] < 0.5 || !navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] < -0.5 || navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Left = true
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] < -0.5 && navigator.getGamepads()[this.Id].axes[1] < 0.5 || !navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Left = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] < -0.5 && navigator.getGamepads()[this.Id].axes[1] < -0.5 || navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Left = true
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] > -0.5 && navigator.getGamepads()[this.Id].axes[0] < 0.5 && navigator.getGamepads()[this.Id].axes[1] > -0.5 && navigator.getGamepads()[this.Id].axes[1] < 0.5 && !navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[9].pressed || navigator.getGamepads()[this.Id].buttons[8].pressed
+                for (i = 0; i < 4; i++) {
+                    this.Buttons[i] = navigator.getGamepads()[this.Id].buttons[i].pressed
+                }
+                this.Buttons[4] = navigator.getGamepads()[this.Id].buttons[4].pressed || navigator.getGamepads()[this.Id].buttons[6].pressed
+                this.Buttons[5] = navigator.getGamepads()[this.Id].buttons[5].pressed || navigator.getGamepads()[this.Id].buttons[7].pressed
+            }
+            if (navigator.getGamepads()[this.Id].id == "Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)") { //PS4 Controller
+                if (navigator.getGamepads()[this.Id].axes[1] < -0.5 || !navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] < -0.5 && navigator.getGamepads()[this.Id].axes[0] > 0.5 || navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Up = true
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] > 0.5 && navigator.getGamepads()[this.Id].axes[1] > -0.5 || !navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] > 0.5 || navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Right = true
+                    this.Down = true
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] < 0.5 || !navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] < -0.5 || navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Left = true
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] < -0.5 && navigator.getGamepads()[this.Id].axes[1] < 0.5 || !navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Left = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] < -0.5 && navigator.getGamepads()[this.Id].axes[1] < -0.5 || navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Left = true
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] > -0.5 && navigator.getGamepads()[this.Id].axes[0] < 0.5 && navigator.getGamepads()[this.Id].axes[1] > -0.5 && navigator.getGamepads()[this.Id].axes[1] < 0.5 && !navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[9].pressed || navigator.getGamepads()[this.Id].buttons[8].pressed || navigator.getGamepads()[this.Id].buttons[17].pressed
+                for (i = 0; i < 4; i++) {
+                    this.Buttons[i] = navigator.getGamepads()[this.Id].buttons[i].pressed
+                }
+                this.Buttons[4] = navigator.getGamepads()[this.Id].buttons[4].pressed || navigator.getGamepads()[this.Id].buttons[6].pressed
+                this.Buttons[5] = navigator.getGamepads()[this.Id].buttons[5].pressed || navigator.getGamepads()[this.Id].buttons[7].pressed
+            }
+            if (navigator.getGamepads()[this.Id].id == "Joy-Con (L)") { //Joy-Con L Android
+                if (!navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Up = true
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Right = true
+                    this.Down = true
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Left = true
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Left = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Left = true
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[6].pressed
+                this.Buttons[0] = navigator.getGamepads()[this.Id].buttons[0].pressed
+                this.Buttons[1] = navigator.getGamepads()[this.Id].buttons[1].pressed
+                this.Buttons[3] = navigator.getGamepads()[this.Id].buttons[2].pressed
+                this.Buttons[4] = navigator.getGamepads()[this.Id].buttons[3].pressed
+
+            }
+            if (navigator.getGamepads()[this.Id].id == "Joy-Con (R)") { //Joy-Con R Android
+                if (!navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Up = true
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Right = true
+                    this.Down = true
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Left = true
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Left = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Left = true
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (!navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[7].pressed
+                this.Buttons[0] = navigator.getGamepads()[this.Id].buttons[0].pressed
+                this.Buttons[1] = navigator.getGamepads()[this.Id].buttons[1].pressed
+                this.Buttons[3] = navigator.getGamepads()[this.Id].buttons[2].pressed
+                this.Buttons[4] = navigator.getGamepads()[this.Id].buttons[3].pressed
+
+            }
+            if (navigator.getGamepads()[this.Id].id == "Pro Controller") { //Nintendo Pro Controller Android
+                if (navigator.getGamepads()[this.Id].axes[1] < -0.5 || !navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] < -0.5 && navigator.getGamepads()[this.Id].axes[0] > 0.5 || navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Up = true
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] > 0.5 && navigator.getGamepads()[this.Id].axes[1] > -0.5 || !navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Right = true
+                    this.Down = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] > 0.5 || navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Right = true
+                    this.Down = true
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] < 0.5 || !navigator.getGamepads()[this.Id].buttons[15].pressed && navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[1] > 0.5 && navigator.getGamepads()[this.Id].axes[0] < -0.5 || navigator.getGamepads()[this.Id].buttons[13].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Down = true
+                    this.Left = true
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] < -0.5 && navigator.getGamepads()[this.Id].axes[1] < 0.5 || !navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed) {
+                    this.Left = true
+                    this.Down = false;
+                    this.Right = false;
+                    this.Up = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] < -0.5 && navigator.getGamepads()[this.Id].axes[1] < -0.5 || navigator.getGamepads()[this.Id].buttons[12].pressed && navigator.getGamepads()[this.Id].buttons[14].pressed) {
+                    this.Left = true
+                    this.Up = true
+                    this.Down = false;
+                    this.Right = false;
+                }
+                if (navigator.getGamepads()[this.Id].axes[0] > -0.5 && navigator.getGamepads()[this.Id].axes[0] < 0.5 && navigator.getGamepads()[this.Id].axes[1] > -0.5 && navigator.getGamepads()[this.Id].axes[1] < 0.5 && !navigator.getGamepads()[this.Id].buttons[12].pressed && !navigator.getGamepads()[this.Id].buttons[13].pressed && !navigator.getGamepads()[this.Id].buttons[14].pressed && !navigator.getGamepads()[this.Id].buttons[15].pressed) {
+                    this.Down = false;
+                    this.Right = false;
+                    this.Left = false;
+                    this.Up = false;
+                }
+                this.Start = navigator.getGamepads()[this.Id].buttons[6].pressed || navigator.getGamepads()[this.Id].buttons[7].pressed
+                this.Buttons[0] = navigator.getGamepads()[this.Id].buttons[0].pressed
+                this.Buttons[1] = navigator.getGamepads()[this.Id].buttons[1].pressed
+                this.Buttons[3] = navigator.getGamepads()[this.Id].buttons[2].pressed
+                this.Buttons[4] = navigator.getGamepads()[this.Id].buttons[3].pressed || navigator.getGamepads()[this.Id].buttons[4].pressed
+            }
+		} else {
+			if (this.Id == "keyboard") { //KeyBoard
+				this.Down = KeyBoard.Down;
+				this.Right = KeyBoard.Right;
+				this.Left = KeyBoard.Left;
+				this.Up = KeyBoard.Up;
+				this.Start = KeyBoard.Start;
+				for (i = 0; i < 6; i++) {
+					this.Buttons[i] = KeyBoard.Buttons[i]
+				}
+			}
+			if (this.Id == "keyboard2") { //KeyBoard2
+				this.Down = KeyBoard2.Down;
+				this.Right = KeyBoard2.Right;
+				this.Left = KeyBoard2.Left;
+				this.Up = KeyBoard2.Up;
+				this.Start = KeyBoard2.Start;
+				for (i = 0; i < 6; i++) {
+					this.Buttons[i] = KeyBoard2.Buttons[i]
+				}
+			}
+
+		}
+    };
+}
+
+function GamepadUpdate() {
+    if (Gamepads.length > 0) {
+        Gamepads[0].Update()
+    }
+    if (Gamepads.length > 1) {
+        Gamepads[1].Update()
+    }
+}
+
+function GamepadConnect() {
+    Gamepads = []
+	
+
+    for (i = 0; i < navigator.getGamepads().length; i++) {
+        if (navigator.getGamepads()[i] != null) {
+            if (navigator.getGamepads()[i].id != "Wireless Gamepad (Vendor: 057e Product: 2009)") {
+                console.log(i + ": " + navigator.getGamepads()[i].id)
+                Gamepads.push(Controller = new Gamepad(i))
+                //players.push(P1 = new component(50, 50, "white", canvas.width / 2, canvas.height - 70))
+            }
+        }
+    }
+
+    if (Gamepads.length < 1) {
+        Gamepads.push(Controller = new Gamepad("keyboard"))
+        //players.push(P1 = new component(50, 50, "white", canvas.width / 2, canvas.height - 70))
+    }
+	if (Gamepads.length < 2) {
+        Gamepads.push(Controller = new Gamepad("keyboard2"))
+        //players.push(P1 = new component(50, 50, "white", canvas.width / 2, canvas.height - 70))
+    }
 }
 
 function sound(src) {
@@ -89,10 +610,12 @@ var scoreP1 = 0
 var scoreP2 = 0
 var scoreCollected = false
 
-var exitTo = "file:///P:/Webside/Spil/"
+var Platforms = [];
+var players = [];
+var playersounds = []
+var collectable = []
 
-document.addEventListener("keydown", keyDownHandler, false)
-document.addEventListener("keyup", keyUpHandler, false)
+document.addEventListener("click",start , false)
 
 
 
@@ -100,8 +623,8 @@ document.addEventListener("keyup", keyUpHandler, false)
 
 
 
-var JumpSoundP1 = new sound("Jump.wav")
-var JumpSoundP2 = new sound("Jump.wav")
+playersounds.push(JumpSoundP1 = new sound("Jump.wav"))
+playersounds.push(JumpSoundP2 = new sound("Jump.wav"))
 var TreasureGet = new sound("Pickup_Coin.wav")
 var TreasureGet2 = new sound("Pickup_Coin.wav")
 var Playin = false
@@ -117,15 +640,6 @@ var MenuMusic = new sound("Ketsa_-_10_-_A_Waiting_Game.mp3")
 
 
 
-var DPressed = false
-var APressed = false
-var WPressed = false
-var SPressed = false
-
-var RightPressed = false
-var LeftPressed = false
-var UpPressed = false
-var DownPressed = false
 
 function keyDownHandler(e) {
 	if(e.keyCode == 32) {
@@ -134,7 +648,7 @@ function keyDownHandler(e) {
 		} 
 	} else if (e.keyCode == 68) {
 		if (gameRunning) {
-			DPressed = true
+			KeyBoard.Right = true
 		}
 	} else if (e.keyCode == 123) {
 		if (gameRunning) {
@@ -148,37 +662,31 @@ function keyDownHandler(e) {
 		}
 	} else if (e.keyCode == 65) {
 		if (gameRunning) {
-			APressed = true
+			KeyBoard.Left = true
 		}
 	} else if (e.keyCode == 87) {
 		if (gameRunning) {
-			WPressed = true
+			KeyBoard.Buttons[0] = true
 		}
 	} else if (e.keyCode == 83) {
 		if (gameRunning) {
-			SPressed = true
-			P1.height = 25
-			P1.superJump = true
-			P1.duck = true
+			KeyBoard.Down = true
 		}
 	} else if (e.keyCode == 39) {
 		if (gameRunning) {
-			RightPressed = true
+			KeyBoard2.Right = true
 		}
 	} else if (e.keyCode == 37) {
 		if (gameRunning) {
-			LeftPressed = true
+			KeyBoard2.Left = true
 		}
 	} else if (e.keyCode == 38) {
 		if (gameRunning) {
-			UpPressed = true
+			KeyBoard2.Buttons[0] = true
 		}
 	} else if (e.keyCode == 40) {
 		if (gameRunning) {
-			DownPressed = true
-			P2.height = 25
-			P2.superJump = true
-			P2.duck = true
+			KeyBoard2.Down = true
 		}
 	}
 }
@@ -193,6 +701,7 @@ function keyUpHandler(e) {
 			select()
 		}
 	} else if (e.keyCode == 27) {
+		openFullscreen()
 		if (gameRunning && !dead) {
 			togglePause()
 		}
@@ -202,7 +711,7 @@ function keyUpHandler(e) {
 		} else if (paused) {
 			changePause()
 		} else if (gameRunning) {
-			UpPressed = false
+			KeyBoard2.Buttons[0] = false
 		}
 	} else if (e.keyCode == 40) {
 		if (!gameRunning) {
@@ -210,10 +719,7 @@ function keyUpHandler(e) {
 		} else if (paused) {
 			changePause()
 		} else if (gameRunning) {
-			DownPressed = false
-			P2.height = 50
-			setTimeout(function jump() {P2.superJump = false}, 100)
-			if (P2.standing) {P2.y = P2.y - P2.height/2}
+			KeyBoard2.Down = false
 		}
 	} else if (e.keyCode == 13) {
 		if (!gameRunning) {
@@ -223,38 +729,35 @@ function keyUpHandler(e) {
 		} 
 	} else if (e.keyCode == 68) {
 		if (gameRunning) {
-			DPressed = false
+			KeyBoard.Right = false
 			P1.runningStart = false
 		}
 	} else if (e.keyCode == 65) {
 		if (gameRunning) {
-			APressed = false
+			KeyBoard.Left = false
 			P1.runningStart = false
 		}
 	} else if (e.keyCode == 87) {
 		if (gameRunning) {
-			WPressed = false
+			KeyBoard.Buttons[0] = false
 		}
 	} else if (e.keyCode == 83) {
 		if (gameRunning) {
-			SPressed = false
-			P1.height = 50
-			setTimeout(function jump() {P1.superJump = false}, 100)
-			if (P1.standing) {P1.y = P1.y - P1.height/2}
+			KeyBoard.Down = false
 		}
 	} else if (e.keyCode == 39) {
 		if (gameRunning) {
-			RightPressed = false
+			KeyBoard2.Right = false
 			P2.runningStart = false
 		}
 	} else if (e.keyCode == 37) {
 		if (gameRunning) {
-			LeftPressed = false
+			KeyBoard2.Left = false
 			P2.runningStart = false
 		}
 	} else if (e.keyCode == 38) {
 		if (gameRunning) {
-			UpPressed = false
+			KeyBoard2.Up = false
 		}
 	}
 }
@@ -306,6 +809,7 @@ function option3() {
 }
 
 function GameStart() {
+	document.removeEventListener("click", GameStart)
 	clearInterval(menu)
 	gameRunning = true
 	score = 0
@@ -313,17 +817,68 @@ function GameStart() {
 	document.getElementById("body").style = "background: #fcef45;"
 	MenuMusic.stop()
 	BackgroundMusic.play()
+	
+	for (i = 0; i < players.length; i++) {
+		
+		players[i].boosting = false;
+		players[i].newPos = function() {
+			this.gravitySpeed += this.gravity;
+			this.x += this.speedX;
+			this.y += this.speedY + this.gravitySpeed;
+			this.hitBottom()
+			if (this.x <= -150) {
+				this.x = canvas.width + 50
+			} else if (this.x >= canvas.width + 100) {
+				this.x = -50
+			}
+
+			if (this.gravitySpeed > 0) {
+				this.standing = false
+			}
+			
+			for (var i = 0; i < Platforms.length; i++) {
+				if (this.y >= Platforms[i].y - this.height && this.y <= Platforms[i].y + 5 && this.x < Platforms[i].x + Platforms[i].width && this.x > Platforms[i].x - this.width) {
+					if (this.gravitySpeed > 0) {
+						this.y = Platforms[i].y - this.height
+						this.standing = true
+						this.gravitySpeed = 0
+						this.boost = 0
+					}
+				}
+			}
+		}
+	}
+	
+	for (i = 0; i < collectable.length; i++) {
+		collectable[i].newPos = function() {
+			this.gravitySpeed += this.gravity;
+			this.x += this.speedX;
+			this.y += this.speedY + this.gravitySpeed;
+			this.hitBottom()
+			
+			for (var i = 0; i < Platforms.length; i++) {
+				if (this.y >= Platforms[i].y - this.height && this.y <= Platforms[i].y + 5 && this.x < Platforms[i].x + Platforms[i].width && this.x > Platforms[i].x - this.width) {
+					if (this.gravitySpeed > 0) {
+						this.y = Platforms[i].y - this.height
+						this.standing = true
+						this.gravitySpeed = 0
+						this.boost = 0
+					}
+				}
+			}
+		}
+    }
 }
 
 function changeOption(updown) {
-	if (updown === "up") {
-		if (selection === 0) {
+	if (updown == "up") {
+		if (selection == 0) {
 			selection = maxOptions
 		} else {
 			selection -= 1
 		}
-	} else if ("down") {
-		if (selection === maxOptions) {
+	} else if (updown == "down") {
+		if (selection == maxOptions) {
 			selection = 0
 		} else {
 			selection += 1
@@ -340,7 +895,7 @@ function credits() {
 	ctx.font = "60px 'Arial Black', Gadget, sans-serif";
 	ctx.fillStyle = "#ffffff";
 	ctx.textAlign = "center"
-	ctx.fillText("Made by lasse333", canvas.width/2, credit);
+	ctx.fillText("Made by René Skjødt", canvas.width/2, credit);
 	if (time >= 300) {setTimeout(function reset() {location.reload(true)}, 3000)}
 	credit += 4
 	time += 1
@@ -354,7 +909,8 @@ function select() {
 		setInterval(credits, 10)
 		setTimeout(function reset() {location.reload(true)}, 7000)
 	} else if (selection === 2 && !dead) {
-		window.location.href = exitTo;
+		closeFullscreen()
+		close()
 	}
 }
 
@@ -460,7 +1016,7 @@ function pauseOption2() {
 function pauseCredit() {
 	ctx.font = "30px 'Arial Black', Gadget, sans-serif";
 	ctx.fillStyle = "#ffffff";
-	ctx.fillText("Made by lasse333", canvas.width/2+5, canvas.height/2+200);
+	ctx.fillText("Made by René Skjødt", canvas.width/2+5, canvas.height/2+200);
 }
 
 function pauseSelect() {
@@ -498,19 +1054,19 @@ function pauseMenu() {
 
 
 
-var P1 = new component(50, 50, "Blue_Player.png", 80, 75, "image")
-var P2 = new component(50, 50, "Red_Player.png", canvas.width - P1.x-50, 75, "image")
-var Coin = new component(30, 30, "Chest.png", canvas.width/2-15, canvas.height-100, "image")
+players.push(P1 = new component(50, 50, "Blue_Player.png", 80, 75, "image"))
+players.push(P2 = new component(50, 50, "Red_Player.png", canvas.width - P1.x-50, 75, "image"))
+collectable.push(Coin = new component(30, 30, "Chest.png", canvas.width/2-15, canvas.height-210, "image"))
 
-var Platform1 = new component(600, 20, "Platform.png", canvas.width/2-600/2, canvas.height/2 + canvas.height/2/2, "image")
-var Platform2 = new component(600, 20, "Platform.png", canvas.width/2-600/2, canvas.height/2/2, "image")
-var Platform3 = new component(600, 20, "Platform.png", canvas.width-500, canvas.height/2, "image")
-var Platform4 = new component(600, 20, "Platform.png", -100, canvas.height/2, "image")
-var Platform5 = new component(canvas.width, 500, "Ground.png", 0, 900, "image")
+Platforms.push(Platform1 = new component(600, 20, "Platform.png", canvas.width/2-600/2, canvas.height/2 + canvas.height/2/2-50, "image"))
+Platforms.push(Platform2 = new component(600, 20, "Platform.png", canvas.width/2-600/2, canvas.height/2/2-30, "image"))
+Platforms.push(Platform3 = new component(600, 20, "Platform.png", canvas.width-500, canvas.height/2-80, "image"))
+Platforms.push(Platform4 = new component(600, 20, "Platform.png", -100, canvas.height/2-80, "image"))
+Platforms.push(Platform5 = new component(canvas.width+100, 500, "Ground.png", -50, 900, "image"))
 
 var BackGround1 = new component(1920, 900, "BackGround.png", 0, 0, "image")
 var BackGround2 = new component(1920, 900, "BackGround.png", 1920, 0, "image")
-var Pillars = new component(1920, 900, "BackGround_Pillars.png", 0, 30, "image")
+var Pillars = new component(1920, 900, "BackGround_Pillars.png", 0, 0, "image")
 
 
 function draw() {
@@ -524,35 +1080,114 @@ function draw() {
 	displayScore()
 	countDown()
 	
-	Platform1.update()
-	Platform2.update()
-	Platform3.update()
-	Platform4.update()
-	Platform5.update()
+    for (i = 0; i < Platforms.length; i++) {
+        Platforms[i].update()
+    }
 	
-	PlatformHitbox()
+	for (i = 0; i < collectable.length; i++) {
+        collectable[i].update()
+		collectable[i].newPos()
+    }
 	
-	P1.update()
-	P2.update()
-	Coin.update()
+	/* PlatformHitbox() */
 	
-	moveP1()
-	moveP2()
+    for (i = 0; i < players.length; i++) {
+        players[i].update()
+        players[i].newPos()
+
+        /* 		if (Gamepads[i].Up) {
+			players[i].speedY = -5
+		} else if (Gamepads[i].Down) {
+			players[i].speedY = 5
+		} else {
+			players[i].speedY = 0
+		} */
+        if (!players[i].boosting || players[i].boost <= 0) {
+            if (Gamepads[i].Left) {
+                players[i].speedX = -11
+				players[i].faceing = "left"
+            } else if (Gamepads[i].Right) {
+                players[i].speedX = 11
+				players[i].faceing = "right"
+            } else {
+                players[i].speedX = 0
+            }
+        }
+		if (Gamepads[i].Down && !Gamepads[i].Left && !Gamepads[i].Right) {
+			players[i].speedX = 0
+			players[i].gravitySpeed = 50
+		}
+        if (Gamepads[i].Buttons[0]) {
+            if (players[i].standing) {
+                players[i].gravitySpeed = -14
+                players[i].standing = false
+                players[i].boost = 15
+				playersounds[i].play()
+            }
+        }
+        if (Gamepads[i].Buttons[1]) {
+			if (players[i].boost >= 0 && !players[i].standing) {
+                players[i].gravity = 0.1
+                players[i].gravitySpeed = 0
+                if (!players[i].boosting) {
+                    if (Gamepads[i].Left) {
+                        players[i].speedX = -23
+                    } else if (Gamepads[i].Right) {
+                        players[i].speedX = 23
+                    }
+                }
+                if (!Gamepads[i].Right && !Gamepads[i].Left && players[i].standing) {
+                    players[i].speedX = 0
+                }
+                players[i].boosting = true;
+                players[i].boost--
+            } else {
+                players[i].gravity = 0.3
+                players[i].speedY = 0
+            }
+        } else {
+            players[i].gravity = 0.3
+            players[i].boosting = false;
+        }
+        if (Gamepads[i].Buttons[2]) {}
+        if (Gamepads[i].Buttons[3]) {
+            
+        }
+        if (Gamepads[i].Start) {}
+/*         if (Gamepads[i].Buttons[4]) {
+            players[i].height = 20
+            players[i].width = 20
+        } else if (Gamepads[i].Buttons[5]) {
+            players[i].height = 80
+            players[i].width = 80
+        } else {
+            players[i].height = 50
+            players[i].width = 50
+        } */
+		
+    }
+/* 	Coin.update() */
 	
-	touchP1()
-	touchP2()
+/* 	moveP1()
+	moveP2() */
+	
+/* 	touchP1()
+	touchP2() */
 	coinHitbox()
 	
-	P1.newPos()
+/* 	P1.newPos()
 	P2.newPos()
-	Coin.newPos()
+	Coin.newPos() */
 	BackGroundMove()
 	
 	GameOver()
-	console.log(window.innerHeight)
+	
+	if (!document.hasFocus()) {
+		togglePause()
+	}
 }
 
-function touchP1() {
+/* function touchP1() {
 	if (P1.y >= P2.y && P1.y <= P2.y + P2.height / 2 && P1.x + P1.width >= P2.x && P1.x < P2.x + P2.width / 2) {
 		P1.x = P2.x - P1.width
 		if (DPressed) {P1.speedX = 0}
@@ -584,7 +1219,7 @@ function touchP2() {
 		P2.standing = true
 		if (!UpPressed) {P2.gravitySpeed = 0}
 	}
-}
+} */
 
 function coinHitbox() {
 	if (!scoreCollected) {
@@ -598,7 +1233,7 @@ function coinHitbox() {
 	}
 }
 
-function PlatformHitbox() {
+/* function PlatformHitbox() {
 	if (P1.y >= Platform1.y - P1.height && P1.y <= Platform1.y + Platform1.height && P1.x < Platform1.x + Platform1.width && P1.x > Platform1.x - P1.width) {
 		if (P1.gravitySpeed > 0) {
 			P1.y = Platform1.y - P1.height
@@ -692,9 +1327,9 @@ function PlatformHitbox() {
 			Coin.gravitySpeed = 0
 		}
 	}
-}
+} */
 
-function moveP1() {
+/* function moveP1() {
 	if (DPressed) {
 		if (!SPressed && P1.y >= canvas.height - P1.height || P1.standing && !SPressed) {
 			P1.speedX = 10
@@ -806,16 +1441,17 @@ function moveP2() {
 	if (P2.gravitySpeed > 0 || P2.gravitySpeed < 0) {
 		P2.standing = false
 	}
-}
+} */
 
 function GameOver() {
 	if (dead) {
 		clearInterval(game)
 		gameRunning = false
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
+		document.getElementById("body").style = "background: #00dd00;"
 		BackGround1.update()
 		BackGround2.update()
-		ctx.font = "150px 'Arial Black', Gadget, sans-serif";
+		ctx.font = "150px 'Press Start 2P', cursive";
 		ctx.fillStyle = "#ff0000";
 		ctx.textAlign = "center";
 		if (scoreP1 > scoreP2) {
@@ -825,20 +1461,21 @@ function GameOver() {
 			P1.height = 250
 			P1.width = 250
 			P1.x = 320
-			P1.y = canvas.height - P1.height
+			P1.y = 900 - P1.height
 			
 			Coin.height = 150
 			Coin.width = 150
 			Coin.x = 1200
-			Coin.y = canvas.height - Coin.height
+			Coin.y = 900 - Coin.height
 			
-			ctx.font = "40px Arial";
+			ctx.font = "40px 'Press Start 2P', cursive";
 			ctx.fillStyle = "blue";
 			ctx.textAlign = "center";
 			ctx.fillText("Score: "+scoreP1, Coin.x+Coin.width/2, Coin.y-10);
 			
 			P1.update()
 			Coin.update()
+			Platform5.update()
 			
 		} else if (scoreP2 > scoreP1) {
 			ctx.fillStyle = "#ff0000";
@@ -847,24 +1484,27 @@ function GameOver() {
 			P2.height = 250
 			P2.width = 250
 			P2.x = 320
-			P2.y = canvas.height - P2.height
+			P2.y = 900- P2.height
 			
 			Coin.height = 150
 			Coin.width = 150
 			Coin.x = 1200
-			Coin.y = canvas.height - Coin.height
+			Coin.y = 900- Coin.height
 			
-			ctx.font = "40px Arial";
+			ctx.font = "40px 'Press Start 2P', cursive";
 			ctx.fillStyle = "red";
 			ctx.textAlign = "center";
 			ctx.fillText("Score: "+scoreP2, Coin.x+Coin.width/2, Coin.y-10);
 			
 			P2.update()
 			Coin.update()
+			Platform5.update()
 			
 		} else if (scoreP1 === scoreP2) {
 			ctx.fillStyle = "#ffffff";
 			ctx.fillText("Draw", canvas.width/2, canvas.height/2);
+			
+			Platform5.update()
 		}
 		setTimeout(function reset() {location.reload(true)}, 3000)
 	} else if (gameRunning) {
@@ -892,7 +1532,7 @@ function CoinCollect(player) {
 	Coin.gravitySpeed = 0
 	
 	Coin.x = Math.floor(Math.random() * 1890)
-	Coin.y = Math.floor(Math.random() * canvas.height-Coin.height)
+	Coin.y = Math.floor(Math.random() * canvas.height-Coin.height-500)
 	
 	scoreCollected = false
 	
@@ -964,17 +1604,61 @@ function countDown() {
 	ctx.font = "50px 'Press Start 2P', cursive";
 	ctx.fillStyle = "grey";
 	ctx.textAlign = "center";
-	ctx.fillText(MM+space1+SS+space2+mm, canvas.width/2, canvas.height/2-150)
+	ctx.fillText(MM+space1+SS+space2+mm, canvas.width/2, canvas.height/2-180)
 }
 
 
 
 
 // Start
+var color = 0
+
+function clickMe() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	ctx.font = "70px 'Press Start 2P', cursive";
+	ctx.fillStyle = "hsl(" + color + ", 100%, 50%)";
+	ctx.textAlign = "center";
+	ctx.fillText("Click to start", canvas.width/2, canvas.height/2);
+	
+	color++
+	if (color == 360) {
+		color = 0
+	}
+}
+
+
+document.body.style = "background-color: #000;"
+canvas.style = "background-color: #000;"
 
 
 
 var miniMenu
 var game
-var menu = setInterval(drawMenu, 10);
-MenuMusic.play()
+var menu
+var controllers
+
+canvas.height = window.innerHeight
+
+var press = setInterval(clickMe, 10)
+
+function start() {
+	clearInterval(press)
+	canvas.height = 1080
+	document.body.style = "background-color: #83FFFB;"
+	canvas.style = "background-color: #83FFFB;"
+	document.removeEventListener("click", start)
+	openFullscreen()
+	
+	GamepadConnect()
+	menu = setInterval(drawMenu, 10);
+	MenuMusic.play()
+	controllers = setInterval(GamepadUpdate, 10)
+	document.addEventListener("click", GameStart, false)
+	document.addEventListener("keydown", keyDownHandler, false)
+	document.addEventListener("keyup", keyUpHandler, false)
+	
+}
+
+
+
+//MenuMusic.play()
