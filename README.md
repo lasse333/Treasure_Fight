@@ -1,4 +1,4 @@
-# Tresure_Fight
+# Treasure_Fight
 2 Player versus game
 
 This Project may not be used on your webside with out asking first
