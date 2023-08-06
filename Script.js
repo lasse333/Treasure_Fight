@@ -4,6 +4,7 @@
 // Var and events
 
 function openFullscreen() {
+  let elem = document.body 
   if (elem.requestFullscreen) {
     elem.requestFullscreen();
   } else if (elem.webkitRequestFullscreen) { /* Safari */
